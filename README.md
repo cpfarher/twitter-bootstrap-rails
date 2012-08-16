@@ -75,7 +75,6 @@ Usage:
 
     rails g bootstrap:themed [RESOURCE_NAME]
 
-
 Example:
 
 
@@ -83,6 +82,45 @@ Example:
     rake db:migrate
     rails g bootstrap:themed Posts
 
+If you wish to used namespaced controllers you can use the following.
+Take note, scaffolding does not support namespaces properly, you will need to
+create your own custom controllers.
+
+Usage:
+
+
+    rails g bootstrap:themed [CONTROLLER_NAMESPACE/RESOURCE_NAME]
+
+Example:
+
+
+    rails g bootstrap:themed admin/posts
+    # This will generate views for Admin::PostsController
+
+    #config/routes.rb
+    namespace :admin do
+      resources :posts
+    end
+
+If you have a namespaced Model and wish to also use that, make sure your
+resource name is namespaced with an underscore.
+
+Usage:
+
+
+    rails g bootstrap:themed [CONTROLLER_NAMESPACE/NAMESPACED_RESOURCE_NAME] [NAMESPACE/RESOURCE_NAME]
+
+Example:
+
+
+    rails g bootstrap:themed admin/admin_posts Admin::Posts
+    # This will generate views for Admin::AdminPostsController & Admin::Posts
+    # Admin/Posts also works
+
+    #config/routes.rb
+    namespace :admin do
+      resources :admin_posts
+    end
 
 
 ## Using with Less

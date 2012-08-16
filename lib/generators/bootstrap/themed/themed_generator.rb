@@ -27,6 +27,7 @@ module Bootstrap
         @controller_routing_path = @controller_file_path.gsub(/\//, '_')
         @model_name = @base_name.singularize.camelize unless @model_name
         @model_name = @model_name.camelize
+        puts @controller_namespace.blank?
       end
 
       def controller_routing_path
@@ -46,7 +47,7 @@ module Bootstrap
       end
 
       def controller_namespace
-        @controller_namespace.to_s.downcase
+        @controller_namespace ? @controller_namespace.to_s.downcase : nil
       end
 
       def model_namespace
@@ -73,10 +74,11 @@ module Bootstrap
       def extract_modules(controller_name,model_name)
         controller_modules = controller_name.include?('/') ? controller_name.split('/') : controller_name.split('::')
         controller_name    = controller_modules.pop
+        controller_namespace = controller_modules.map { |n| n.capitalize }.join("::")
         controller_path    = controller_modules.map { |m| m.underscore }
         file_path = (controller_path + [controller_name.underscore]).join('/')
         nesting = controller_modules.map { |m| m.camelize }.join('::')
-        controller_namespace = controller_modules.map { |n| n.capitalize }.join("::")
+        controller_namespace = nil if controller_namespace.blank?
         if model_name
           model_modules = model_name.include?('/') ? model_name.split('/') : model_name.split('::')
           model_name = model_modules.pop
