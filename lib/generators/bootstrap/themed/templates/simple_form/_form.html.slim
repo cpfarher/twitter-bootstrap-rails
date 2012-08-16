@@ -1,4 +1,4 @@
-= simple_form_for @<%= resource_name %>, :html => { :class => "form-horizontal" } do |f|
+= simple_form_for <%= controller_namespace ? "[:#{controller_namespace},@#{resource_name}]" : "@#{resource_name}" %>, :html => { :class => "form-horizontal" } do |f|
 <%- columns.each do |column| -%>
   = f.input :<%= column.name %>
 <%- end -%>

@@ -22,9 +22,10 @@ module Bootstrap
       protected
 
       def initialize_views_variables
-        @base_name, @controller_class_path, @controller_file_path, @controller_class_nesting, @controller_class_nesting_depth = extract_modules(controller_path)
+        @base_name, @controller_class_path, @controller_file_path, @controller_class_nesting, @controller_class_nesting_depth, @controller_namespace, @model_namespace = extract_modules(controller_path,model_name)
+        @controller_routing_path = @controller_namespace ? "#{@controller_namespace}_#{@controller_routing_path}" : @controller_routing_path
         @controller_routing_path = @controller_file_path.gsub(/\//, '_')
-        @model_name = @controller_class_nesting + "::#{@base_name.singularize.camelize}" unless @model_name
+        @model_name = @base_name.singularize.camelize unless @model_name
         @model_name = @model_name.camelize
       end
 
@@ -36,7 +37,7 @@ module Bootstrap
         @controller_routing_path.singularize
       end
 
-      def model_name
+      def class_name
         @model_name
       end
 
@@ -44,8 +45,16 @@ module Bootstrap
         @model_name.pluralize
       end
 
+      def controller_namespace
+        @controller_namespace.to_s.downcase
+      end
+
+      def model_namespace
+        @model_namespace ? @model_namespace.constantize : nil
+      end
+
       def resource_name
-        @model_name.demodulize.underscore
+        @model_name.demodulize.downcase
       end
 
       def plural_resource_name
@@ -61,13 +70,21 @@ module Bootstrap
         end
       end
 
-      def extract_modules(name)
-        modules = name.include?('/') ? name.split('/') : name.split('::')
-        name    = modules.pop
-        path    = modules.map { |m| m.underscore }
-        file_path = (path + [name.underscore]).join('/')
-        nesting = modules.map { |m| m.camelize }.join('::')
-        [name, path, file_path, nesting, modules.size]
+      def extract_modules(controller_name,model_name)
+        controller_modules = controller_name.include?('/') ? controller_name.split('/') : controller_name.split('::')
+        controller_name    = controller_modules.pop
+        controller_path    = controller_modules.map { |m| m.underscore }
+        file_path = (controller_path + [controller_name.underscore]).join('/')
+        nesting = controller_modules.map { |m| m.camelize }.join('::')
+        controller_namespace = controller_modules.map { |n| n.capitalize }.join("::")
+        if model_name
+          model_modules = model_name.include?('/') ? model_name.split('/') : model_name.split('::')
+          model_name = model_modules.pop
+          model_namespace = model_modules.map { |m| m.capitalize }.join("::")
+        else
+          model_namespace = nil
+        end
+        [controller_name, controller_path, file_path, nesting, controller_modules.size, controller_namespace, model_namespace]
       end
 
       def generate_views
