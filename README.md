@@ -113,14 +113,28 @@ Usage:
 Example:
 
 
-    rails g bootstrap:themed admin/admin_posts Admin::Posts
-    # This will generate views for Admin::AdminPostsController & Admin::Posts
+    rails g bootstrap:themed admin/admin_posts Admin::Post
+    # This will generate views for Admin::AdminPostsController & Admin::Post
     # Admin/Posts also works
 
     #config/routes.rb
     namespace :admin do
       resources :admin_posts
     end
+
+You may also want to just have a namespaced model.
+
+Usage:
+
+
+    rails g bootstrap:themed [NAMESPACED_RESOURCE_NAME] [MODEL_NAMESPACE/MODEL_NAME]
+
+Example:
+
+
+    rails g bootstrap:themed admin_posts Admin::Post
+    #config/routes.rb
+    resources :admin_posts
 
 
 ## Using with Less
