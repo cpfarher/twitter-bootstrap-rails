@@ -108,7 +108,7 @@ resource name is namespaced with an underscore.
 Usage:
 
 
-    rails g bootstrap:themed [CONTROLLER_NAMESPACE/NAMESPACED_RESOURCE_NAME] [NAMESPACE/RESOURCE_NAME]
+    rails g bootstrap:themed [CONTROLLER_NAMESPACE/NAMESPACED_RESOURCE_NAME] [MODEL_NAMESPACE/MODEL_NAME]
 
 Example:
 
