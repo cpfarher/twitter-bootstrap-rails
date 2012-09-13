@@ -22,9 +22,9 @@ Gem::Specification.new do |s|
   s.add_dependency             'actionpack', '>= 3.1'
   
   if (RUBY_PLATFORM == 'java')
-    s.add_dependency          'therubyrhino', '~> 1.73.4'
-  elsif (RUBY_PLATFORM != 'i386-mingw32')
-    s.add_dependency          'therubyracer', '>= 0.11.0beta5'
+    s.add_dependency  'therubyrhino', '~> 1.73.4'
+  else
+    s.add_dependency  'therubyracer', '~> 0.10.2'
   end
   
   s.add_runtime_dependency     'less-rails', '~> 2.2.3'
