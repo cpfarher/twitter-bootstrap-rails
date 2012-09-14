@@ -5,10 +5,10 @@ module Bootstrap
   module Generators
     class ThemedGenerator < ::Rails::Generators::Base
       source_root File.expand_path('../templates', __FILE__)
-      argument :controller_path,    :type => :string
-      argument :model_name,         :type => :string, :required => false
-      argument :layout,             :type => :string, :default => "application",
-                                    :banner => "Specify application layout"
+      argument :controller_path_or_model,    :type => :string
+      argument :model_name,                  :type => :string, :required => false
+      argument :layout,                      :type => :string, :default => "application",
+                                             :banner => "Specify application layout"
 
       def initialize(args, *options)
         super(args, *options)
@@ -22,12 +22,14 @@ module Bootstrap
       protected
 
       def initialize_views_variables
-        @base_name, @controller_class_path, @controller_file_path, @controller_class_nesting, @controller_class_nesting_depth, @controller_namespace, @model_namespace = extract_modules(controller_path,model_name)
+        # Checks if controller path was supplied, if not, treat arguments
+        # accepted as a Model instead
+
+        @base_name, @controller_class_path, @controller_file_path, @controller_class_nesting, @controller_class_nesting_depth, @controller_namespace, @model_namespace = extract_modules(controller_path_or_model,model_name)
         @controller_routing_path = @controller_namespace ? "#{@controller_namespace}_#{@controller_routing_path}" : @controller_routing_path
         @controller_routing_path = @controller_file_path.gsub(/\//, '_')
         @model_name = @base_name.singularize.camelize unless @model_name
         @model_name = @model_name.camelize
-        puts @controller_namespace.blank?
       end
 
       def controller_routing_path
@@ -72,21 +74,33 @@ module Bootstrap
       end
 
       def extract_modules(controller_name,model_name)
-        controller_modules = controller_name.include?('/') ? controller_name.split('/') : controller_name.split('::')
-        controller_name    = controller_modules.pop
-        controller_namespace = controller_modules.map { |n| n.capitalize }.join("::")
-        controller_path    = controller_modules.map { |m| m.underscore }
-        file_path = (controller_path + [controller_name.underscore]).join('/')
-        nesting = controller_modules.map { |m| m.camelize }.join('::')
-        controller_namespace = nil if controller_namespace.blank?
-        if model_name
+        if model_name.present?
+          p "Controller & Model was supplied"
+          controller_modules = controller_name.include?('/') ? controller_name.split('/') : controller_name.split('::')
+          controller_name    = controller_modules.pop
           model_modules = model_name.include?('/') ? model_name.split('/') : model_name.split('::')
           model_name = model_modules.pop
           model_namespace = model_modules.map { |m| m.capitalize }.join("::")
+          controller_path = controller_modules.map { |m| m.underscore }
+          file_path = (controller_path + [controller_name.underscore.downcase.pluralize]).join('/')
+          nesting = controller_modules.map { |m| m.camelize }.join('::')
+          controller_namespace = nil if controller_namespace.blank?
+          [controller_name, controller_path, file_path, nesting, controller_modules.size, controller_namespace, model_namespace]
         else
-          model_namespace = nil
+          p "Only Model supplied"
+          model_name = controller_name
+          model_modules = model_name.split('/')
+          model_name = model_modules.pop
+          model_namespace = model_modules.map { |m| m.capitalize }.join("::")
+          controller_name = model_name.split("::").join("_").downcase.pluralize
+          controller_namespace = model_modules.map { |m| m.capitalize }.join("::")
+          controller_modules = model_modules
+          controller_path = controller_modules.map { |m| m.underscore.pluralize }
+          file_path = (controller_path + [controller_name.split("::").join("_").underscore.downcase.pluralize]).join('/')
+          nesting = controller_modules.map { |m| m.camelize }.join('::')
+          controller_namespace = nil if controller_namespace.blank?
+          [model_name, controller_path, file_path, nesting, controller_modules.size, controller_namespace, model_namespace]
         end
-        [controller_name, controller_path, file_path, nesting, controller_modules.size, controller_namespace, model_namespace]
       end
 
       def generate_views
